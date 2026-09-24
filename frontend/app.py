@@ -231,14 +231,14 @@ Generate the final document now.
                 with st.spinner(
                     "🤖 Gemini AI is preparing your document..."
                 ):
-
-                    result = generator.generate_document(
+result = generator.generate_document(
     document_type=document_type,
     parties=parties,
     terms=terms,
     dates=str(effective_date),
 )
-                    )
+
+generated_document = result.content or ""
 
                 generated_document = response.text or ""
 
