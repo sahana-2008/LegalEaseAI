@@ -1,7 +1,7 @@
 import os
 from dataclasses import dataclass
 
-from google import genai
+import requests
 
 
 @dataclass
@@ -12,12 +12,9 @@ class GenerationResult:
 
 class GeminiDocumentGenerator:
     def __init__(self):
-        self.api_key = os.getenv("GEMINI_API_KEY")
-        self.model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
-        self.client = None
-
-        if self.api_key:
-            self.client = genai.Client(api_key=self.api_key)
+        self.api_key = os.getenv("GEMINI_API_KEY", "").strip()
+        self.model = os.getenv("GEMINI_MODEL", "gemini-3.5-flash").strip()
+        self.client = bool(self.api_key)
 
     def generate_document(
         self,
@@ -27,7 +24,7 @@ class GeminiDocumentGenerator:
         dates: str,
     ) -> GenerationResult:
 
-        if not self.client:
+        if not self.api_key:
             return GenerationResult(
                 content=self._demo_document(
                     document_type,
@@ -43,27 +40,58 @@ Create a professional legal document.
 
 Document Type: {document_type}
 Parties: {parties}
-Terms: {terms}
-Dates: {dates}
+Terms & Conditions: {terms}
+Effective Date: {dates}
 
-Write the document clearly with suitable headings,
-clauses, and signature sections.
+Write a complete professional legal document with:
+- Clear title
+- Proper headings
+- Numbered clauses
+- Important terms
+- Signature sections
+
+Use simple, formal legal language.
 
 This is a document drafting assistant, not legal advice.
 """
 
-        response = self.client.models.generate_content(
-            model=self.model,
-            contents=prompt,
-            config={
-                "http_options": {
-                    "timeout": 30000
-                }
-            },
+        url = (
+            f"https://generativelanguage.googleapis.com/v1beta/models/"
+            f"{self.model}:generateContent?key={self.api_key}"
         )
 
+        payload = {
+            "contents": [
+                {
+                    "parts": [
+                        {
+                            "text": prompt
+                        }
+                    ]
+                }
+            ]
+        }
+
+        response = requests.post(
+            url,
+            json=payload,
+            timeout=60,
+        )
+
+        response.raise_for_status()
+
+        data = response.json()
+
+        try:
+            content = data["candidates"][0]["content"]["parts"][0]["text"]
+        except (KeyError, IndexError, TypeError):
+            content = ""
+
+        if not content:
+            raise RuntimeError("Gemini returned an empty response.")
+
         return GenerationResult(
-            content=response.text or "",
+            content=content,
             demo_mode=False,
         )
 
