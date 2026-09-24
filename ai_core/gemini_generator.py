@@ -1,9 +1,9 @@
 import os
 from dataclasses import dataclass
-try:
-    from google import genai
-except ImportError:
-    genai = None
+
+from google import genai
+
+
 @dataclass
 class GenerationResult:
     content: str
@@ -14,11 +14,9 @@ class GeminiDocumentGenerator:
     def __init__(self):
         self.api_key = os.getenv("GEMINI_API_KEY")
         self.model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
-
         self.client = None
 
         if self.api_key:
-            self.client = None
             self.client = genai.Client(api_key=self.api_key)
 
     def generate_document(
@@ -32,7 +30,10 @@ class GeminiDocumentGenerator:
         if not self.client:
             return GenerationResult(
                 content=self._demo_document(
-                    document_type, parties, terms, dates
+                    document_type,
+                    parties,
+                    terms,
+                    dates,
                 ),
                 demo_mode=True,
             )
