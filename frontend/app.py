@@ -232,9 +232,12 @@ Generate the final document now.
                     "🤖 Gemini AI is preparing your document..."
                 ):
 
-                    response = generator.client.models.generate_content(
-                        model=generator.model,
-                        contents=prompt,
+                    result = generator.generate_document(
+    document_type=document_type,
+    parties=parties,
+    terms=terms,
+    dates=str(effective_date),
+)
                     )
 
                 generated_document = response.text or ""
@@ -363,11 +366,14 @@ Rules:
                 with st.spinner(
                     "🤖 Gemini AI is editing your document..."
                 ):
+                result = generator.generate_document(
+    document_type="Edited Legal Document",
+    parties="",
+    terms=prompt,
+    dates="",
+)
 
-                    response = generator.client.models.generate_content(
-                        model=generator.model,
-                        contents=prompt,
-                    )
+edited_document = result.content or ""
 
                 edited_document = response.text or ""
 
