@@ -1,10 +1,9 @@
 import os
 from dataclasses import dataclass
-
-from google import genai
-
-
-
+try:
+    from google import genai
+except ImportError:
+    genai = None
 @dataclass
 class GenerationResult:
     content: str
