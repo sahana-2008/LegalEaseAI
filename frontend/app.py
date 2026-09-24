@@ -227,20 +227,15 @@ Generate the final document now.
             # ---------------------------------------------
 
             try:
+                with st.spinner("🤖 Gemini AI is preparing your document..."):
+                    result = generator.generate_document(
+                        document_type=document_type,
+                        parties=parties,
+                        terms=terms,
+                        dates=str(effective_date),
+                    )
 
-                with st.spinner(
-                    "🤖 Gemini AI is preparing your document..."
-                ):
-result = generator.generate_document(
-    document_type=document_type,
-    parties=parties,
-    terms=terms,
-    dates=str(effective_date),
-)
-
-generated_document = result.content or ""
-
-                generated_document = response.text or ""
+                generated_document = result.content or ""
 
                 # -----------------------------------------
                 # SHOW RESULT
@@ -267,145 +262,14 @@ generated_document = result.content or ""
                     )
 
                 else:
-
                     st.error(
                         "Gemini returned an empty response."
                     )
 
             except Exception as e:
-
                 st.error(
                     f"AI document generation failed: {e}"
                 )
-
-
-# =========================================================
-# EDIT DOCUMENT
-# =========================================================
-
-elif mode == "Edit Document":
-
-    st.header("✏️ Edit Legal Document")
-
-    existing_document = st.text_area(
-        "Paste your existing legal document",
-        placeholder="Paste your document text here...",
-        height=350,
-    )
-
-    editing_instruction = st.text_area(
-        "What would you like to change?",
-        placeholder=(
-            "Example:\n"
-            "Make the language more professional.\n"
-            "Correct grammar.\n"
-            "Make the document easier to understand."
-        ),
-        height=150,
-    )
-
-    if st.button(
-        "✨ Apply Changes",
-        use_container_width=True,
-    ):
-
-        if not existing_document.strip():
-
-            st.warning(
-                "Please enter a document first."
-            )
-
-        elif not editing_instruction.strip():
-
-            st.warning(
-                "Please enter an editing instruction."
-            )
-
-        elif not generator.client:
-
-            st.error(
-                "Gemini AI is not connected. "
-                "Please check GEMINI_API_KEY in the .env file."
-            )
-
-        else:
-
-            clean_document = sanitize_text(
-                existing_document
-            )
-
-            clean_instruction = sanitize_text(
-                editing_instruction
-            )
-
-            prompt = f"""
-You are a professional legal document editing assistant.
-
-Rewrite the following legal document according to the user's
-editing instruction.
-
-EXISTING DOCUMENT:
-{clean_document}
-
-EDITING INSTRUCTION:
-{clean_instruction}
-
-Rules:
-- Keep the original meaning.
-- Do not change names, dates, amounts, addresses, or important facts
-  unless the user explicitly asks you to change them.
-- Improve grammar and clarity when requested.
-- Use clear and professional legal language.
-- Preserve important information.
-- Return only the edited document.
-- Do not include explanations.
-"""
-
-            try:
-with st.spinner(
-    "🤖 Gemini AI is preparing your document..."
-):
-    result = generator.generate_document(
-        document_type=document_type,
-        parties=parties,
-        terms=terms,
-        dates=str(effective_date),
-    )
-
-generated_document = result.content or ""
-
-edited_document = result.content or ""
-
-                edited_document = response.text or ""
-
-                if edited_document.strip():
-
-                    st.session_state["document"] = (
-                        edited_document.strip()
-                    )
-
-                    st.success(
-                        "✅ Document edited successfully."
-                    )
-
-                    st.subheader(
-                        "📄 Edited Document"
-                    )
-
-                    st.text_area(
-                        "Edited Document Preview",
-                        edited_document,
-                        height=500,
-                    )
-
-                else:
-
-                    st.error(
-                        "Gemini returned an empty response."
-                    )
-
-            except Exception as e:
-
                 st.error(
                     f"AI document editing failed: {e}"
                 )
