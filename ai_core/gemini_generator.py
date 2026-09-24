@@ -18,6 +18,7 @@ class GeminiDocumentGenerator:
         self.client = None
 
         if self.api_key:
+            self.client = None
             self.client = genai.Client(api_key=self.api_key)
 
     def generate_document(
