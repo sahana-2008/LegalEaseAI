@@ -362,16 +362,17 @@ Rules:
 """
 
             try:
+with st.spinner(
+    "🤖 Gemini AI is preparing your document..."
+):
+    result = generator.generate_document(
+        document_type=document_type,
+        parties=parties,
+        terms=terms,
+        dates=str(effective_date),
+    )
 
-                with st.spinner(
-                    "🤖 Gemini AI is editing your document..."
-                ):
-                result = generator.generate_document(
-    document_type="Edited Legal Document",
-    parties="",
-    terms=prompt,
-    dates="",
-)
+generated_document = result.content or ""
 
 edited_document = result.content or ""
 
